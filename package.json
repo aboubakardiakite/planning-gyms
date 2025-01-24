@@ -53,6 +53,7 @@
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
+    "typedoc": "0.27.6",
     "typescript": "5.3.3"
   },
   "jest": {
@@ -70,5 +71,10 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "typedoc": {
+    "entryPoints": ["src/index.ts"],
+    "out": "docs",
+    "tsconfig": "tsconfig.json"
   }
 }
