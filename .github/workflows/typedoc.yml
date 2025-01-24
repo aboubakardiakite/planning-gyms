@@ -1,13 +1,11 @@
-name: Build Documentation
+name: Deploy Documentation
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
-  build-docs:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,10 +15,16 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '16' # Assurez-vous que la version de Node.js correspond à celle de votre projet
+        node-version: '16'
 
     - name: Install dependencies
       run: npm install
 
     - name: Build documentation
-      run: npx typedoc 
+      run: npx typedoc
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.TOKEN_GITHUB }}
+        publish_dir: ./docs 
