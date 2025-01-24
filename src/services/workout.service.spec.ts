@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WorkoutService } from './workout.service';
-import { User } from '../entities/user.entity';
-import { WorkoutSession } from '../entities/workout-session.entity';
 
 describe('WorkoutService', () => {
   let service: WorkoutService;
@@ -33,4 +31,4 @@ describe('WorkoutService', () => {
     expect(result.userId).toBe(user.id);
     expect(result.title).toBe(workoutData.title);
   });
-}); 
+});

@@ -6,4 +6,4 @@ export class WorkoutSession {
   completed: boolean;
   requiredLevel: 'BEGINNER' | 'PRE_INTERMEDIATE' | 'INTERMEDIATE' | 'ADVANCED';
   userId: number;
-} 
+}

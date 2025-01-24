@@ -18,4 +18,4 @@ export class CreateWorkoutDto {
 
   @IsEnum(['BEGINNER', 'PRE_INTERMEDIATE', 'INTERMEDIATE', 'ADVANCED'] as const)
   requiredLevel: 'BEGINNER' | 'PRE_INTERMEDIATE' | 'INTERMEDIATE' | 'ADVANCED';
-} 
+}

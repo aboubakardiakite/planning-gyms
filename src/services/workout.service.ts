@@ -29,21 +29,19 @@ export class WorkoutService {
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 7);
 
-    return this.workouts.filter(w => 
-      w.userId === userId && 
-      w.scheduledDate >= startDate && 
-      w.scheduledDate <= endDate
+    return this.workouts.filter(
+      w => w.userId === userId && w.scheduledDate >= startDate && w.scheduledDate <= endDate,
     );
   }
 
   async checkWeeklyCompletion(userId: number, startDate: Date) {
     const workouts = await this.getWeeklyWorkouts(userId, startDate);
     const missedWorkouts = workouts.filter(w => !w.completed);
-    
+
     if (missedWorkouts.length > 0) {
       const nextWeekStart = new Date(startDate);
       nextWeekStart.setDate(nextWeekStart.getDate() + 7);
-      
+
       for (const workout of missedWorkouts) {
         await this.scheduleWorkout(userId, {
           ...workout,
@@ -61,7 +59,7 @@ export class WorkoutService {
       ...userData,
       workoutSessions: [],
     } as User;
-    
+
     this.users.push(user);
     return user;
   }
@@ -69,4 +67,4 @@ export class WorkoutService {
   getUser(userId: number): User | undefined {
     return this.users.find(u => u.id === userId);
   }
-} 
+}

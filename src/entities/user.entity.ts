@@ -1,4 +1,4 @@
-import { WorkoutSession } from "./workout-session.entity";
+import { WorkoutSession } from './workout-session.entity';
 
 export class User {
   id: number;
@@ -6,4 +6,4 @@ export class User {
   email: string;
   fitnessLevel: 'BEGINNER' | 'PRE_INTERMEDIATE' | 'INTERMEDIATE' | 'ADVANCED' = 'BEGINNER';
   workoutSessions: WorkoutSession[] = [];
-} 
+}

@@ -3,7 +3,6 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../app.module';
 import { WorkoutService } from '../services/workout.service';
-import { WorkoutSession } from '../entities/workout-session.entity';
 import { CreateWorkoutDto } from '../dto/create-workout.dto';
 
 describe('WorkoutController (Integration)', () => {
@@ -16,11 +15,13 @@ describe('WorkoutController (Integration)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({
-      transform: true,
-      whitelist: true,
-    }));
-    
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+      }),
+    );
+
     workoutService = moduleFixture.get<WorkoutService>(WorkoutService);
     await app.init();
   });
@@ -31,7 +32,6 @@ describe('WorkoutController (Integration)', () => {
   });
 
   describe('POST /workouts/:userId', () => {
-
     it('should return 400 when user does not exist', async () => {
       const workoutData: CreateWorkoutDto = {
         title: 'Morning Workout',
@@ -126,7 +126,7 @@ describe('WorkoutController (Integration)', () => {
 
       const nextWeekWorkouts = await workoutService.getWeeklyWorkouts(
         user.id,
-        new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+        new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000),
       );
 
       expect(nextWeekWorkouts.length).toBeGreaterThan(0);
@@ -137,4 +137,4 @@ describe('WorkoutController (Integration)', () => {
   afterAll(async () => {
     await app.close();
   });
-}); 
+});

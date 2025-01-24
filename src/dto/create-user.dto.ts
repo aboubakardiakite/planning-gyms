@@ -9,4 +9,4 @@ export class CreateUserDto {
 
   @IsEnum(['BEGINNER', 'PRE_INTERMEDIATE', 'INTERMEDIATE', 'ADVANCED'])
   fitnessLevel: string;
-} 
+}
