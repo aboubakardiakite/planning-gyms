@@ -46,4 +46,4 @@ jobs:
           - Commit: `${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:${{ github.sha }}`
         draft: false
         prerelease: false
-        token: ${{ secrets.GITHUB_TOKEN }} 
+        token: ${{ secrets.TOKEN_GITHUB }} 
