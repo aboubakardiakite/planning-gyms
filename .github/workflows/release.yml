@@ -15,7 +15,7 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
@@ -26,17 +26,16 @@ jobs:
     - name: Get commit messages
       id: get-commits
       run: |
-        echo "commits<<EOF" >> $GITHUB_OUTPUT
-        git log $(git describe --tags --abbrev=0 2>/dev/null || echo HEAD^)..HEAD --pretty=format:"- %s" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+        COMMITS=$(git log $(git describe --tags --abbrev=0 2>/dev/null || echo HEAD^)..HEAD --pretty=format:"- %s")
+        echo "commits<<ENDOFCOMMITS" >> $GITHUB_OUTPUT
+        echo "$COMMITS" >> $GITHUB_OUTPUT
+        echo "ENDOFCOMMITS" >> $GITHUB_OUTPUT
 
     - name: Create Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v1
       with:
         tag_name: v${{ steps.package-version.outputs.version }}
-        release_name: Release v${{ steps.package-version.outputs.version }}
+        name: Release v${{ steps.package-version.outputs.version }}
         body: |
           ## What's Changed
           ${{ steps.get-commits.outputs.commits }}
@@ -46,4 +45,5 @@ jobs:
           - Version: `${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:${{ steps.package-version.outputs.version }}`
           - Commit: `${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:${{ github.sha }}`
         draft: false
-        prerelease: false 
+        prerelease: false
+        token: ${{ secrets.TOKEN_GITHUB }} 
