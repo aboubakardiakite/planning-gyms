@@ -4,9 +4,21 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_run:
+    workflows: ["Branch CI"]
+    types:
+      - completed
+    branches:
+      - main
 
 jobs:
   quality:
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -54,6 +66,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Get version from package.json
       id: package-version
