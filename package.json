@@ -20,8 +20,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:ci": "npm run test:unit && npm run test:integration",
-    "docs:generate": "typedoc",
-    "docs:serve": "typedoc --watch && python3 -m http.server 8080 --directory docs"
+    "docs:generate": "npx typedoc",
+    "docs:serve": "npm run docs:generate && python3 -m http.server 8080 -d docs"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -55,8 +55,7 @@
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
-    "typedoc": "0.27.7",
-    "typedoc-plugin-markdown": "3.14.0",
+    "typedoc": "^0.25.8",
     "typescript": "5.3.3"
   },
   "jest": {
@@ -74,19 +73,5 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  },
-  "typedoc": {
-    "entryPointStrategy": "expand",
-    "entryPoints": ["./src"],
-    "out": "docs",
-    "tsconfig": "tsconfig.json",
-    "plugin": ["typedoc-plugin-markdown"],
-    "theme": "markdown",
-    "excludePrivate": true,
-    "excludeProtected": true,
-    "excludeExternals": true,
-    "includeVersion": true,
-    "categorizeByGroup": true,
-    "categoryOrder": ["Controllers", "Services", "Entities", "DTOs", "*"]
   }
 }

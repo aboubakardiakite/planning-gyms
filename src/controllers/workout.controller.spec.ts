@@ -3,7 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../app.module';
 import { WorkoutService } from '../services/workout.service';
-import { CreateWorkoutDto } from '../dto/create-workout.dto';
+import { CreateWorkoutDto, FitnessLevel } from '../dto/create-workout.dto';
 
 describe('WorkoutController (Integration)', () => {
   let app: INestApplication;
@@ -38,7 +38,7 @@ describe('WorkoutController (Integration)', () => {
         scheduledDate: new Date(),
         duration: 45,
         completed: false,
-        requiredLevel: 'BEGINNER',
+        requiredLevel: FitnessLevel.BEGINNER,
       };
 
       await request(app.getHttpServer())
@@ -85,7 +85,7 @@ describe('WorkoutController (Integration)', () => {
         scheduledDate: startDate,
         duration: 30,
         completed: false,
-        requiredLevel: 'BEGINNER',
+        requiredLevel: FitnessLevel.BEGINNER,
       };
 
       await workoutService.scheduleWorkout(user.id, workoutData);
@@ -114,7 +114,7 @@ describe('WorkoutController (Integration)', () => {
         scheduledDate: startDate,
         duration,
         completed: false,
-        requiredLevel: 'BEGINNER',
+        requiredLevel: FitnessLevel.BEGINNER,
       };
 
       await workoutService.scheduleWorkout(user.id, workoutData);
