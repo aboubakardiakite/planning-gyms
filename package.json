@@ -19,9 +19,7 @@
     "test:integration": "jest --testPathPattern='\\.controller\\.spec\\.ts$'",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:ci": "npm run test:unit && npm run test:integration",
-    "docs:generate": "typedoc",
-    "docs:serve": "typedoc --watch --serve"
+    "test:ci": "npm run test:unit && npm run test:integration"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -55,8 +53,6 @@
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
-    "typedoc": "0.27.6",
-    "typedoc-plugin-markdown": "3.17.1",
     "typescript": "5.3.3"
   },
   "jest": {
@@ -74,25 +70,5 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  },
-  "typedoc": {
-    "entryPoints": [
-      "src/main.ts",
-      "src/app.module.ts",
-      "src/controllers/**/*.ts",
-      "src/services/**/*.ts",
-      "src/entities/**/*.ts",
-      "src/dto/**/*.ts"
-    ],
-    "out": "docs",
-    "tsconfig": "tsconfig.json",
-    "plugin": ["typedoc-plugin-markdown"],
-    "theme": "default",
-    "excludePrivate": true,
-    "excludeProtected": true,
-    "excludeExternals": true,
-    "includeVersion": true,
-    "categorizeByGroup": true,
-    "categoryOrder": ["Controllers", "Services", "Entities", "DTOs", "*"]
   }
 }
