@@ -1,0 +1,9 @@
+title: Workout Planner API Documentation
+description: Documentation technique de l'API de planification d'entraînement
+theme: jekyll-theme-minimal
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor 

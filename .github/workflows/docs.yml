@@ -9,30 +9,52 @@ on:
       - 'package.json'
       - 'tsconfig.json'
       - '.github/workflows/docs.yml'
+      - 'docs/**'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.TOKEN_GITHUB }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          npm install --save-dev @typedoc/plugin-markdown
 
       - name: Generate documentation
-        run: npm run docs:generate
+        run: |
+          npm run docs:generate
+          cp docs/_config.yml docs/assets/css/style.scss docs/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs'
 
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+        id: deployment
+        uses: actions/deploy-pages@v4
         with:
-          folder: docs
-          branch: gh-pages 
+          token: ${{ secrets.TOKEN_GITHUB }} 
