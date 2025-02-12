@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          npm install --save-dev @typedoc/plugin-markdown
+          npm install --save-dev typedoc-plugin-markdown@3.17.1
 
       - name: Generate documentation
         run: |
