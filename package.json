@@ -20,7 +20,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:ci": "npm run test:unit && npm run test:integration",
-    "docs:generate": "typedoc",
+    "docs:generate": "typedoc && mkdir -p docs/assets/css && touch docs/assets/css/style.scss",
     "docs:serve": "typedoc --watch --serve"
   },
   "dependencies": {

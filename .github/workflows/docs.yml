@@ -9,6 +9,7 @@ on:
       - 'package.json'
       - 'tsconfig.json'
       - '.github/workflows/docs.yml'
+      - 'docs/**'
 
 jobs:
   build-and-deploy:
@@ -40,7 +41,9 @@ jobs:
           npm install --save-dev @typedoc/plugin-markdown
 
       - name: Generate documentation
-        run: npm run docs:generate
+        run: |
+          npm run docs:generate
+          cp docs/_config.yml docs/assets/css/style.scss docs/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
