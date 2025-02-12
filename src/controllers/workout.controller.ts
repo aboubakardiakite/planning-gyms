@@ -13,7 +13,6 @@ import { CreateWorkoutDto } from '../dto/create-workout.dto';
 
 /**
  * Contrôleur pour la gestion des séances d'entraînement
- * @class WorkoutController
  */
 @Controller('workouts')
 export class WorkoutController {
