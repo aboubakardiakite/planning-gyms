@@ -43,7 +43,11 @@ jobs:
       - name: Generate documentation
         run: |
           npm run docs:generate
-          cp docs/_config.yml docs/assets/css/style.scss docs/
+          mkdir -p docs/_layouts docs/_includes docs/assets/css
+          echo "---" > docs/assets/css/style.scss
+          echo "---" >> docs/assets/css/style.scss
+          echo "@import \"{{ site.theme }}\";" >> docs/assets/css/style.scss
+          cp docs/_config.yml docs/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

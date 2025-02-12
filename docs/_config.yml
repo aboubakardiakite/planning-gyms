@@ -1,9 +1,18 @@
 title: Workout Planner API Documentation
 description: Documentation technique de l'API de planification d'entraînement
 theme: jekyll-theme-minimal
+baseurl: "/planning-gyms"
+
+markdown: GFM
+highlighter: rouge
 
 exclude:
   - Gemfile
   - Gemfile.lock
   - node_modules
-  - vendor 
+  - vendor
+  - README.md
+
+sass:
+  style: compressed
+  sass_dir: _sass 
