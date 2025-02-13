@@ -2,18 +2,12 @@ name: Main CI/CD
 
 on:
   push:
-    branches-ignore:
-      - main
-  pull_request:
     branches:
       - main
   workflow_dispatch:
 
 jobs:
   quality:
-    if: |
-      github.event_name == 'push' ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -94,6 +88,26 @@ jobs:
         key: ${{ secrets.OVH_SSH_KEY }}
         port: 22
         script: |
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:latest
-          docker compose -f docker-compose.yml down
-          docker compose -f docker-compose.yml up -d 
+          mkdir -p ~/workout-planner
+          
+          cat > ~/workout-planner/docker-compose.yml << 'EOL'
+          version: '3.8'
+          
+          services:
+            api:
+              image: ${DOCKERHUB_USERNAME}/workout-planner:latest
+              container_name: workout-planner-api
+              restart: always
+              ports:
+                - "3000:3000"
+              environment:
+                - NODE_ENV=production
+                - PORT=3000
+          EOL
+          
+          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" > ~/workout-planner/.env
+          
+          cd ~/workout-planner
+          docker compose pull
+          docker compose down
+          docker compose up -d 
