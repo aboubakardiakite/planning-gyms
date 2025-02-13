@@ -84,4 +84,16 @@ jobs:
         tags: |
           ${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:latest
           ${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:${{ steps.package-version.outputs.version }}
-          ${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:${{ github.sha }} 
+          ${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:${{ github.sha }}
+
+    - name: Deploy to Production
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.OVH_SSH_KEY }}
+        port: 22
+        script: |
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:latest
+          docker compose -f docker-compose.yml down
+          docker compose -f docker-compose.yml up -d 
