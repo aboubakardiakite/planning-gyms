@@ -2,17 +2,12 @@ name: Main CI/CD
 
 on:
   push:
+    branches-ignore:
+      - main
+  pull_request:
     branches:
       - main
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-  workflow_run:
-    workflows: ["Branch CI"]
-    types:
-      - completed
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   quality:

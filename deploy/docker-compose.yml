@@ -1,0 +1,8 @@
+services:
+  workout-planner:
+    image: aboubakar940/workout-planner:latest
+    container_name: "workout-planner"
+    ports:
+      - "8080:8080"
+    deploy:
+      replicas: 2
