@@ -19,7 +19,6 @@ on:
       - '**.md'
       - 'docs/**'
 
-
 jobs:
   quality:
     runs-on: ubuntu-latest
