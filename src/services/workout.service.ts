@@ -67,4 +67,8 @@ export class WorkoutService {
   getUser(userId: number): User | undefined {
     return this.users.find(u => u.id === userId);
   }
+
+  getHello() {
+    return 'hello world';
+  }
 }

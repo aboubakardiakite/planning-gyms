@@ -21,6 +21,19 @@ export class WorkoutController {
   constructor(private readonly workoutService: WorkoutService) {}
 
   /**
+   * Récupère un message de salutation
+   *
+   * @returns Message de salutation
+   *
+   * @example
+   * GET /workouts/hello
+   */
+  @Get('hello')
+  getHello(): string {
+    return this.workoutService.getHello();
+  }
+
+  /**
    * Planifie une nouvelle séance d'entraînement pour un utilisateur
    *
    * @param userId - Identifiant de l'utilisateur
