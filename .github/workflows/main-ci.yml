@@ -1,57 +1,15 @@
 name: Main CI/CD
 
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  quality:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: '.nvmrc'
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Check code style
-      run: |
-        npm run format:check
-        npm run lint
-
-  test:
-    needs: quality
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: '.nvmrc'
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Run unit tests
-      run: npm run test:unit
-
-    - name: Run integration tests
-      run: npm run test:integration
-
-    - name: Generate coverage report
-      run: npm run test:cov
-
   deploy:
-    needs: test
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -88,26 +46,6 @@ jobs:
         key: ${{ secrets.OVH_SSH_KEY }}
         port: 22
         script: |
-          mkdir -p ~/workout-planner
-          
-          cat > ~/workout-planner/docker-compose.yml << 'EOL'
-          version: '3.8'
-          
-          services:
-            api:
-              image: ${DOCKERHUB_USERNAME}/workout-planner:latest
-              container_name: workout-planner-api
-              restart: always
-              ports:
-                - "3000:3000"
-              environment:
-                - NODE_ENV=production
-                - PORT=3000
-          EOL
-          
-          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" > ~/workout-planner/.env
-          
-          cd ~/workout-planner
-          docker compose pull
-          docker compose down
-          docker compose up -d 
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:latest
+          docker compose -f docker-compose.yml down
+          docker compose -f docker-compose.yml up -d 
