@@ -69,6 +69,6 @@ export class WorkoutService {
   }
 
   getHello() {
-    return 'hello world !!';
+    return 'hello world 2 !!';
   }
 }
