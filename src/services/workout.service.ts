@@ -13,12 +13,12 @@ export class WorkoutService {
     @InjectModel(WorkoutSession.name) private workoutModel: Model<WorkoutSessionDocument>,
   ) {}
 
-  async createUser(userData: CreateUserDto): Promise<User> {
+  async createUser(userData: CreateUserDto): Promise<UserDocument> {
     const newUser = new this.userModel(userData);
     return newUser.save();
   }
 
-  async scheduleWorkout(userId: string, workoutData: CreateWorkoutDto): Promise<WorkoutSession> {
+  async scheduleWorkout(userId: string, workoutData: CreateWorkoutDto): Promise<WorkoutSessionDocument> {
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new BadRequestException('Utilisateur non trouvé');
@@ -30,13 +30,13 @@ export class WorkoutService {
     });
 
     const savedWorkout = await workout.save();
-    user.workoutSessions.push(savedWorkout._id);
+    user.workoutSessions.push(savedWorkout._id as Types.ObjectId);
     await user.save();
 
     return savedWorkout;
   }
 
-  async getWeeklyWorkouts(userId: string, startDate: Date): Promise<WorkoutSession[]> {
+  async getWeeklyWorkouts(userId: string, startDate: Date): Promise<WorkoutSessionDocument[]> {
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 7);
 
@@ -46,11 +46,11 @@ export class WorkoutService {
         $gte: startDate,
         $lte: endDate,
       },
-    });
+    }).exec();
   }
 
   async checkWeeklyCompletion(userId: string, startDate: Date): Promise<void> {
-    const workouts = await this.getWeeklyWorkouts(userId, startDate);
+    const workouts = await this.getWeeklyWorkouts(userId, startDate) as WorkoutSessionDocument[];
     const missedWorkouts = workouts.filter(w => !w.completed);
 
     if (missedWorkouts.length > 0) {

@@ -21,19 +21,6 @@ export class WorkoutController {
   constructor(private readonly workoutService: WorkoutService) {}
 
   /**
-   * Récupère un message de salutation
-   *
-   * @returns Message de salutation
-   *
-   * @example
-   * GET /workouts/hello
-   */
-  @Get('hello')
-  getHello(): string {
-    return this.workoutService.getHello();
-  }
-
-  /**
    * Planifie une nouvelle séance d'entraînement pour un utilisateur
    *
    * @param userId - Identifiant de l'utilisateur
@@ -51,7 +38,10 @@ export class WorkoutController {
    */
   @Post(':userId')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async scheduleWorkout(@Param('userId') userId: number, @Body() workoutData: CreateWorkoutDto) {
+  async scheduleWorkout(
+    @Param('userId') userId: string,
+    @Body() workoutData: CreateWorkoutDto,
+  ) {
     return this.workoutService.scheduleWorkout(userId, workoutData);
   }
 
@@ -66,7 +56,10 @@ export class WorkoutController {
    * GET /workouts/123/weekly?startDate=2024-02-12
    */
   @Get(':userId/weekly')
-  async getWeeklyWorkouts(@Param('userId') userId: number, @Query('startDate') startDate: string) {
+  async getWeeklyWorkouts(
+    @Param('userId') userId: string,
+    @Query('startDate') startDate: string,
+  ) {
     return this.workoutService.getWeeklyWorkouts(userId, new Date(startDate));
   }
 
@@ -82,7 +75,7 @@ export class WorkoutController {
    */
   @Post(':userId/check-completion')
   async checkWeeklyCompletion(
-    @Param('userId') userId: number,
+    @Param('userId') userId: string,
     @Query('startDate') startDate: string,
   ) {
     return this.workoutService.checkWeeklyCompletion(userId, new Date(startDate));
