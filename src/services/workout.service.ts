@@ -1,40 +1,55 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { WorkoutSession } from '../entities/workout-session.entity';
-import { User } from '../entities/user.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { User, UserDocument } from '../schemas/user.schema';
+import { WorkoutSession, WorkoutSessionDocument } from '../schemas/workout-session.schema';
+import { CreateWorkoutDto } from '../dto/create-workout.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
 
 @Injectable()
 export class WorkoutService {
-  private users: User[] = [];
-  private workouts: WorkoutSession[] = [];
-  private lastUserId = 0;
-  private lastWorkoutId = 0;
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(WorkoutSession.name) private workoutModel: Model<WorkoutSessionDocument>,
+  ) {}
 
-  async scheduleWorkout(userId: number, workoutData: Partial<WorkoutSession>) {
-    const user = this.users.find(u => u.id === userId);
+  async createUser(userData: CreateUserDto): Promise<User> {
+    const newUser = new this.userModel(userData);
+    return newUser.save();
+  }
+
+  async scheduleWorkout(userId: string, workoutData: CreateWorkoutDto): Promise<WorkoutSession> {
+    const user = await this.userModel.findById(userId);
     if (!user) {
       throw new BadRequestException('Utilisateur non trouvé');
     }
 
-    const workout = {
-      id: ++this.lastWorkoutId,
+    const workout = new this.workoutModel({
       ...workoutData,
-      userId,
-    } as WorkoutSession;
+      userId: new Types.ObjectId(userId),
+    });
 
-    this.workouts.push(workout);
-    return workout;
+    const savedWorkout = await workout.save();
+    user.workoutSessions.push(savedWorkout._id);
+    await user.save();
+
+    return savedWorkout;
   }
 
-  async getWeeklyWorkouts(userId: number, startDate: Date) {
+  async getWeeklyWorkouts(userId: string, startDate: Date): Promise<WorkoutSession[]> {
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 7);
 
-    return this.workouts.filter(
-      w => w.userId === userId && w.scheduledDate >= startDate && w.scheduledDate <= endDate,
-    );
+    return this.workoutModel.find({
+      userId: new Types.ObjectId(userId),
+      scheduledDate: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    });
   }
 
-  async checkWeeklyCompletion(userId: number, startDate: Date) {
+  async checkWeeklyCompletion(userId: string, startDate: Date): Promise<void> {
     const workouts = await this.getWeeklyWorkouts(userId, startDate);
     const missedWorkouts = workouts.filter(w => !w.completed);
 
@@ -44,31 +59,11 @@ export class WorkoutService {
 
       for (const workout of missedWorkouts) {
         await this.scheduleWorkout(userId, {
-          ...workout,
+          ...workout.toObject(),
           scheduledDate: nextWeekStart,
           duration: workout.duration + 15,
         });
       }
     }
-  }
-
-  // Méthodes utilitaires pour la gestion des utilisateurs
-  createUser(userData: Partial<User>): User {
-    const user = {
-      id: ++this.lastUserId,
-      ...userData,
-      workoutSessions: [],
-    } as User;
-
-    this.users.push(user);
-    return user;
-  }
-
-  getUser(userId: number): User | undefined {
-    return this.users.find(u => u.id === userId);
-  }
-
-  getHello() {
-    return 'hello world 2 !!';
   }
 }

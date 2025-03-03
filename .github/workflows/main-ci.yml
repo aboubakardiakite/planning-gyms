@@ -34,36 +34,36 @@ jobs:
           ${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:${{ steps.package-version.outputs.version }}
           ${{ secrets.DOCKERHUB_USERNAME }}/workout-planner:${{ github.sha }}
 
-    - name: Deploy to Production
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USERNAME }}
-        key: ${{ secrets.OVH_SSH_KEY }}
-        port: 22
-        script: |
-          # Créer le dossier et le fichier docker-compose.yml
-          mkdir -p ~/workout-planner
-          cat > ~/workout-planner/docker-compose.yml << 'EOL'
-          version: '3.8'
+    # - name: Deploy to Production
+      # uses: appleboy/ssh-action@v1.0.3
+      # with:
+      #   host: ${{ secrets.VPS_HOST }}
+      #   username: ${{ secrets.VPS_USERNAME }}
+      #   key: ${{ secrets.OVH_SSH_KEY }}
+      #   port: 22
+      #   script: |
+      #     # Créer le dossier et le fichier docker-compose.yml
+      #     mkdir -p ~/workout-planner
+      #     cat > ~/workout-planner/docker-compose.yml << 'EOL'
+      #     version: '3.8'
           
-          services:
-            api:
-              image: ${DOCKERHUB_USERNAME}/workout-planner:latest
-              container_name: workout-planner-api
-              restart: always
-              ports:
-                - "3000:3000"
-              environment:
-                - NODE_ENV=production
-                - PORT=3000
-          EOL
+      #     services:
+      #       api:
+      #         image: ${DOCKERHUB_USERNAME}/workout-planner:latest
+      #         container_name: workout-planner-api
+      #         restart: always
+      #         ports:
+      #           - "3000:3000"
+      #         environment:
+      #           - NODE_ENV=production
+      #           - PORT=3000
+      #     EOL
           
-          # Créer le fichier .env
-          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" > ~/workout-planner/.env
+      #     # Créer le fichier .env
+      #     echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" > ~/workout-planner/.env
           
-          # Déployer l'application
-          cd ~/workout-planner
-          docker compose pull
-          docker compose down
-          docker compose up -d 
+      #     # Déployer l'application
+      #     cd ~/workout-planner
+      #     docker compose pull
+      #     docker compose down
+      #     docker compose up -d 

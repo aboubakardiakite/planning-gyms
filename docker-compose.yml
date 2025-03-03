@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   api:
-    image: ${DOCKERHUB_USERNAME}/workout-planner:latest
+    image: aboubakar940/workout-planner:latest
     container_name: workout-planner-api
     restart: always
     ports:

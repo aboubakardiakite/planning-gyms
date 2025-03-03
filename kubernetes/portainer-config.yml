@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portainer-config
+  namespace: workout-planner-api
+data:
+  PORTAINER_HOST: "0.0.0.0"
+  PORTAINER_PORT: "9000"
