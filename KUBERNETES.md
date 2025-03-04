@@ -1,300 +1,181 @@
-# Guide de déploiement Kubernetes
+# Guide de Déploiement Kubernetes - Workout Planner API
 
-Ce document explique la configuration et le déploiement de l'application workout-planner-api sur Kubernetes.
+## 1. Prérequis
+- Kubectl installé et configuré
+- Accès à un cluster Kubernetes
+- Docker Hub configuré
 
-## Structure des fichiers 
-
+## 2. Structure des Fichiers
 ```bash
 kubernetes/
-├── deployment.yml     # Définit comment déployer l'application
-├── service.yml       # Configure l'accès à l'application
-├── ingress.yml      # Gère le routage externe
-└── network-policy.yml # Définit les règles de sécurité réseau
+├── configmap.yml         # Variables d'environnement
+├── deployment.yml        # Configuration du déploiement
+├── service.yml          # Exposition des services
+├── ingress.yml         # Routage externe
+├── mongodb.yml         # Déploiement MongoDB
+└── network-policy.yml  # Règles de sécurité réseau
 ```
 
-## Ordre de déploiement recommandé
+## 3. Déploiement Initial
 
+### Création du Namespace
 ```bash
-# Configure Portainer pour la gestion visuelle des conteneurs
-kubectl apply -f kubernetes/portainer-config.yml
-
-# Déploie l'application principale
-kubectl apply -f kubernetes/deployment.yml
-
-# Expose l'application via un service
-kubectl apply -f kubernetes/service.yml
-
-# Configure les règles de sécurité réseau
-kubectl apply -f kubernetes/network-policy.yml
-
-# Configure le routage externe
-kubectl apply -f kubernetes/ingress.yml
+# Créer un namespace dédié
+kubectl create namespace workout-planner-api
 ```
 
-## Configuration de MongoDB
-
+### Déploiement des Composants
 ```bash
-# 1. Créer le volume persistant pour MongoDB
-# Cela garantit que les données persistent même si le pod est redémarré
-kubectl apply -f kubernetes/mongodb-pvc.yml
-
-# 2. Créer le service MongoDB
-# Permet aux autres pods de communiquer avec MongoDB
-kubectl apply -f kubernetes/mongodb-service.yml
-
-# 3. Déployer MongoDB
-# Lance l'instance MongoDB avec la configuration spécifiée
-kubectl apply -f kubernetes/mongodb-deployment.yml
-
-# 4. Configurer l'application
-# Met à jour les variables d'environnement de l'application
+# 1. ConfigMaps
 kubectl apply -f kubernetes/workout-planner-config.yml
+kubectl apply -f kubernetes/configmap.yml
 
-# 5. Redéployer l'application
-# Redémarre l'application avec la nouvelle configuration
-kubectl apply -f kubernetes/deployment.yml
-
-# Vérifications :
-
-# Affiche tous les services dans le namespace
-kubectl get svc -n workout-planner-api
-
-# Liste les pods MongoDB spécifiquement
-kubectl get pods -n workout-planner-api -l app=mongodb
-
-# Vérifie l'état du stockage persistant
-kubectl get pvc -n workout-planner-api
-
-# Affiche la capacité de stockage utilisée
-kubectl get pvc mongodb-pvc -n workout-planner-api -o jsonpath='{.status.capacity.storage}'
-```
-
-## Configuration des Sauvegardes
-
-```bash
-# Crée un volume persistant dédié aux sauvegardes
+# 2. Volumes persistants
+kubectl apply -f kubernetes/mongodb-pvc.yml
 kubectl apply -f kubernetes/backup-pvc.yml
 
-# Configure une tâche automatique de sauvegarde
+# 3. MongoDB
+kubectl apply -f kubernetes/mongodb-deployment.yml
+kubectl apply -f kubernetes/mongodb-service.yml
+
+# 4. Application principale
+kubectl apply -f kubernetes/deployment.yml
+kubectl apply -f kubernetes/service.yml
+
+# 5. Ingress
+kubectl apply -f kubernetes/ingress.yml
+
+# 6. Backup CronJob
 kubectl apply -f kubernetes/mongodb-backup-cronjob.yml
+
+# 7. Network Policy
+kubectl apply -f kubernetes/network-policy.yml
 ```
 
-## Mise en place du Monitoring
-
-```bash
-# Configure les règles de surveillance Prometheus
-kubectl apply -f kubernetes/prometheus-configmap.yml
-
-# Déploie Prometheus pour la collecte de métriques
-kubectl apply -f kubernetes/prometheus-deployment.yml
-```
-
-## Commandes de Vérification
-
-```bash
-# Vérifie l'état du stockage persistant
-kubectl get pvc -n workout-planner-api
-
-# Affiche les tâches de sauvegarde programmées
-kubectl get cronjobs -n workout-planner-api
-
-# Liste les pods Prometheus pour le monitoring
-kubectl get pods -l app=prometheus -n workout-planner-api
-```
-
-## Commandes de Debug
-
-```bash
-# Affiche les logs détaillés d'un pod
-kubectl logs <nom-du-pod>
-
-# Permet d'accéder à un shell dans le pod
-kubectl exec -it <nom-du-pod> -- /bin/sh
-
-# Supprime et recrée automatiquement un pod
-kubectl delete pod <nom-du-pod>
-
-# Affiche les détails et les événements d'un pod
-kubectl describe pod <nom-du-pod>
-
-# Surveille l'utilisation des ressources
-kubectl top pods
-```
-
-## Commandes de Maintenance
-
-```bash
-# Met à jour l'image de l'application
-kubectl set image deployment/workout-planner-api \
-  workout-planner-api=aboubakar940/workout-planner:latest
-
-# Vérifie le statut de la mise à jour
-kubectl rollout status deployment/workout-planner-api
-
-# Ajuste le nombre de réplicas
-kubectl scale deployment workout-planner-api --replicas=3
-```
-
-## Notes Importantes
-
-- Toujours vérifier les logs après un déploiement
-- Faire des sauvegardes avant les mises à jour majeures
-- Surveiller régulièrement l'utilisation des ressources
-- Tester les mises à jour dans un environnement de staging
-
-## 2. Commandes Essentielles
+## 4. Commandes de Gestion
 
 ### Vérification du Déploiement
-
 ```bash
 # Vérifier les pods
-kubectl get pods
-# Résultat attendu :
-# NAME                                   READY   STATUS    RESTARTS   AGE
-# workout-planner-api-xxxxxx-yyyy        1/1     Running   0          1m
+kubectl get pods -n workout-planner-api
 
-# Vérifier le service
-kubectl get services
-# Résultat attendu :
-# NAME                 TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
-# workout-planner-api  NodePort   10.xx.xx.xx    <none>        80:30000/TCP   1m
+# Vérifier les services
+kubectl get services -n workout-planner-api
+
+# Vérifier l'ingress
+kubectl get ingress -n workout-planner-api
 ```
 
-### Gestion des Pods
-
+### Logs et Debug
 ```bash
 # Voir les logs d'un pod
-kubectl logs <nom-du-pod>
+kubectl logs -f <nom-du-pod> -n workout-planner-api
 
-# Entrer dans un pod
-kubectl exec -it <nom-du-pod> -- /bin/sh
+# Accéder à un pod
+kubectl exec -it <nom-du-pod> -n workout-planner-api -- /bin/sh
 
-# Supprimer un pod (il sera recréé automatiquement)
-kubectl delete pod <nom-du-pod>
-
-kubectl get pods --all-namespaces
+# Voir les détails d'un pod
+kubectl describe pod <nom-du-pod> -n workout-planner-api
 ```
 
 ### Mise à Jour de l'Application
-
 ```bash
 # Mettre à jour l'image
 kubectl set image deployment/workout-planner-api \
-  workout-planner-api=aboubakar940/workout-planner:nouvelle-version
+  workout-planner-api=aboubakar940/workout-planner:latest -n workout-planner-api
 
-# Vérifier le statut du déploiement
-kubectl rollout status deployment/workout-planner-api
+# Vérifier le déploiement
+kubectl rollout status deployment/workout-planner-api -n workout-planner-api
 ```
+
+### Port-Forward pour Test Local
+```bash
+# Accéder à l'API localement
+kubectl port-forward -n workout-planner-api svc/api 3000:3000
+
+```
+
+## 5. Surveillance
+
+### Monitoring
+```bash
+# Utilisation des ressources
+kubectl top pods -n workout-planner-api
+
+# Événements du namespace
+kubectl get events -n workout-planner-api
+```
+
+### État des Services
+```bash
+# Vérifier les endpoints
+kubectl get endpoints -n workout-planner-api
+
+# Statut des services
+kubectl get services -n workout-planner-api
+```
+
+## 6. Maintenance
 
 ### Scaling
-
 ```bash
-# Augmenter le nombre de réplicas
-kubectl scale deployment workout-planner-api --replicas=3
-
-# Vérifier le nouveau nombre de pods
-kubectl get pods
+# Ajuster le nombre de réplicas
+kubectl scale deployment workout-planner-api --replicas=3 -n workout-planner-api
 ```
 
-## 3. Surveillance et Debug
-
-### Surveillance des Ressources
-```bash
-# Voir l'utilisation des ressources
-kubectl top pods
-
-# Voir les événements
-kubectl get events --sort-by=.metadata.creationTimestamp
-```
-
-### Debug
-```bash
-# Décrire un pod pour le diagnostic
-kubectl describe pod <nom-du-pod>
-
-# Voir les logs en temps réel
-kubectl logs -f <nom-du-pod>
-```
-
-## 4. Nettoyage
-
+### Nettoyage
 ```bash
 # Supprimer le déploiement
-kubectl delete -f kubernetes/deployment.yml
+kubectl delete -f kubernetes/deployment.yml -n workout-planner-api
 
-# Supprimer le service
-kubectl delete -f kubernetes/service.yml
+# Supprimer tout le namespace
+kubectl delete namespace workout-planner-api
 ```
 
-## 5. Bonnes Pratiques
+## 7. Bonnes Pratiques
+- Toujours spécifier le namespace dans les commandes
+- Vérifier les logs après chaque déploiement
+- Utiliser des tags spécifiques pour les images
+- Sauvegarder régulièrement la base de données
+- Surveiller l'utilisation des ressources
 
-1. **Gestion des Images**
-   - Toujours utiliser des tags spécifiques en production
-   - Éviter le tag `latest`
+## 8. Troubleshooting
 
-2. **Haute Disponibilité**
-   - Maintenir au moins 2 réplicas
-   - Utiliser des anti-affinités pour répartir les pods
+### Problèmes Courants
+1. Pod en CrashLoopBackOff :
+```bash
+kubectl describe pod <pod-name> -n workout-planner-api
+kubectl logs <pod-name> -n workout-planner-api --previous
+```
 
-3. **Monitoring**
-   - Configurer des liveness et readiness probes
-   - Mettre en place des limites de ressources
+2. Service inaccessible :
+```bash
+kubectl get endpoints -n workout-planner-api
+kubectl describe service api -n workout-planner-api
+```
 
-4. **Sécurité**
-   - Utiliser des secrets pour les données sensibles
-   - Limiter les permissions des conteneurs
+3. Problèmes de ressources :
+```bash
+kubectl top pods -n workout-planner-api
+kubectl describe pod <pod-name> -n workout-planner-api
+```
 
-## 6. Troubleshooting Commun
 
-1. **Pod en état CrashLoopBackOff**
-   ```bash
-   kubectl describe pod <nom-du-pod>
-   kubectl logs <nom-du-pod> --previous
-   ```
-
-2. **Service inaccessible**
-   ```bash
-   kubectl get endpoints workout-planner-api
-   kubectl describe service workout-planner-api
-   ```
-
-3. **Problèmes de mémoire**
-   ```bash
-   kubectl top pods
-   kubectl describe pod <nom-du-pod>
-   ```
-
-## 7. Accès à l'Application
-
-L'application sera accessible à :
-- En local : `http://localhost:30000`
-- Sur le cluster : `http://<node-ip>:30000`
-
-## 8. Notes Importantes
-
-- Sauvegardez régulièrement vos fichiers de configuration
-- Documentez les changements de configuration
-- Testez les mises à jour dans un environnement de staging
-- Surveillez l'utilisation des ressources
-
-## Pour faire un port-forward d'un service spécifique
+# commande test
 
 ```bash
-kubectl get services --all-namespaces
 
-# Syntaxe générale
-kubectl port-forward -n <namespace> svc/<nom-du-service> <port-local>:<port-service>
+curl -X POST http://localhost:30000/use
+rs \                                            
+  -H "Content-Type: application/json" \
+  -d '{                             
+    "username": "john1doe",
+    "email": "john1.doe@example.com",
+    "fitnessLevel": "INTERMEDIATE"
+  }'
 
-kubectl port-forward service/api 3000:3000 -n workout-planner-api
+```
 
-# Exemples courants :
-# Pour Prometheus
-kubectl port-forward -n monitoring svc/prometheus-service 9090:9090
-
-# Pour Portainer
+```bash
 kubectl port-forward -n portainer svc/portainer 9000:9000
-
-# Pour voir les port-forwards actifs
-ps aux | grep "kubectl port-forward"
-
 ```

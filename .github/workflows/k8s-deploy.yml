@@ -1,0 +1,65 @@
+name: Deploy to K3s
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        run: |
+          if ! command -v kubectl &> /dev/null; then
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            chmod +x kubectl
+            sudo mv kubectl /usr/local/bin/
+          fi
+
+      - name: Create namespace if not exists
+        run: |
+          if ! kubectl get namespace workout-planner-api &> /dev/null; then
+            kubectl create namespace workout-planner-api
+          fi
+
+      - name: Deploy MongoDB
+        run: |
+          kubectl apply -f kubernetes/mongodb.yml -n workout-planner-api
+          kubectl apply -f kubernetes/mongodb-pvc.yml -n workout-planner-api
+          kubectl rollout status deployment/mongodb -n workout-planner-api
+
+      - name: Deploy ConfigMaps
+        run: |
+          kubectl apply -f kubernetes/configmap.yml -n workout-planner-api
+          kubectl apply -f kubernetes/workout-planner-config.yml -n workout-planner-api
+
+      - name: Deploy Application
+        run: |
+          kubectl apply -f kubernetes/deployment.yml -n workout-planner-api
+          kubectl apply -f kubernetes/service.yml -n workout-planner-api
+          kubectl rollout status deployment/workout-planner-api -n workout-planner-api
+
+      - name: Deploy Network Policies
+        run: |
+          kubectl apply -f kubernetes/network-policy.yml -n workout-planner-api
+
+      - name: Verify Deployment
+        run: |
+          kubectl get pods -n workout-planner-api
+          kubectl get services -n workout-planner-api
+          echo "Application deployed successfully!"
+
+      - name: Setup Monitoring
+        run: |
+          kubectl apply -f kubernetes/prometheus-config.yaml -n workout-planner-api
+          kubectl apply -f kubernetes/prometheus-deployment.yml -n workout-planner-api
+
+      - name: Setup Backup
+        run: |
+          kubectl apply -f kubernetes/backup-pvc.yml -n workout-planner-api
+          kubectl apply -f kubernetes/mongodb-backup-cronjob.yml -n workout-planner-api 
