@@ -173,7 +173,7 @@ curl -X POST http://localhost:3000/users \
     "fitnessLevel": "INTERMEDIATE"
   }'
 
-```
+``
 
 ```bash
 kubectl port-forward -n portainer svc/portainer 9000:9000
