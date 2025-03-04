@@ -66,4 +66,15 @@ export class WorkoutService {
       }
     }
   }
+
+  async getUserById(id: string): Promise<UserDocument | null> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+    return this.userModel.findById(id).exec();
+  }
+
+  async getAllUsers(): Promise<UserDocument[]> {
+    return this.userModel.find().exec();
+  }
 }

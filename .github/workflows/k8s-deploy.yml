@@ -1,7 +1,10 @@
 name: Deploy to K3s
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Main CI/CD"]  # Nom exact du workflow main-ci.yml
+    types:
+      - completed
     branches:
       - main
   workflow_dispatch:
@@ -9,6 +12,7 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    if: github.event.workflow_run.conclusion == 'success'  # S'exécute uniquement si main-ci réussit
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,7 +35,7 @@ jobs:
         run: |
           kubectl apply -f kubernetes/mongodb.yml -n workout-planner-api
           kubectl apply -f kubernetes/mongodb-pvc.yml -n workout-planner-api
-          kubectl rollout status deployment/mongodb -n workout-planner-api
+          kubectl rollout status deployment/mongodb -n workout-planner-api --timeout=120s
 
       - name: Deploy ConfigMaps
         run: |
@@ -42,6 +46,7 @@ jobs:
         run: |
           kubectl apply -f kubernetes/deployment.yml -n workout-planner-api
           kubectl apply -f kubernetes/service.yml -n workout-planner-api
+          kubectl rollout status deployment/workout-planner-api -n workout-planner-api --timeout=120s
 
       - name: Deploy Network Policies
         run: |
@@ -49,8 +54,12 @@ jobs:
 
       - name: Verify Deployment
         run: |
+          echo "Checking pods status..."
           kubectl get pods -n workout-planner-api
+          echo "Checking services status..."
           kubectl get services -n workout-planner-api
+          echo "Checking endpoints..."
+          kubectl get endpoints -n workout-planner-api
           echo "Application deployed successfully!"
 
       - name: Setup Backup
