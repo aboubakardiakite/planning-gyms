@@ -54,11 +54,6 @@ jobs:
           kubectl get services -n workout-planner-api
           echo "Application deployed successfully!"
 
-      - name: Setup Monitoring
-        run: |
-          kubectl apply -f kubernetes/prometheus-config.yaml -n workout-planner-api
-          kubectl apply -f kubernetes/prometheus-deployment.yml -n workout-planner-api
-
       - name: Setup Backup
         run: |
           kubectl apply -f kubernetes/backup-pvc.yml -n workout-planner-api
