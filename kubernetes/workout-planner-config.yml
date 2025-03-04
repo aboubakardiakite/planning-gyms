@@ -5,7 +5,8 @@ metadata:
   namespace: workout-planner-api
 data:
   # Variables d'environnement de base
-  NODE_ENV: "development"
+  NODE_ENV: "production"
+  API_PORT: "3000"
   PORT: "3000"
   
   # Configuration MongoDB
@@ -20,4 +21,4 @@ data:
   JWT_EXPIRES_IN: "1d"
   
   # Configuration Logger
-  LOG_LEVEL: "debug" 
+  LOG_LEVEL: "info" 

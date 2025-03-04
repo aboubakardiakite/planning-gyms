@@ -165,12 +165,11 @@ kubectl describe pod <pod-name> -n workout-planner-api
 
 ```bash
 
-curl -X POST http://localhost:30000/use
-rs \                                            
+curl -X POST http://localhost:3000/users \
   -H "Content-Type: application/json" \
-  -d '{                             
-    "username": "john1doe",
-    "email": "john1.doe@example.com",
+  -d '{
+    "username": "john_doe",
+    "email": "john@example.com",
     "fitnessLevel": "INTERMEDIATE"
   }'
 

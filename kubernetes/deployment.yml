@@ -19,6 +19,14 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: workout-planner-config
+              key: PORT
+        - name: MONGODB_URI
+          value: "mongodb://mongodb:27017/workout-planner"
         envFrom:
         - configMapRef:
             name: workout-planner-config
@@ -29,14 +37,6 @@ spec:
           requests:
             memory: "128Mi"
             cpu: "100m"
-        env:
-        - name: API_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: workout-planner-config
-              key: API_PORT
-        - name: MONGODB_URI
-          value: "mongodb://mongodb:27017/workout-planner"
         volumeMounts:
         - name: config-volume
           mountPath: /app/config
